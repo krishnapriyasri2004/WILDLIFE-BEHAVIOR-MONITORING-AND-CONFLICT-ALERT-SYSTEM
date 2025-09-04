@@ -1,0 +1,164 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">Simulated Detection System</h1>
+    <p class="text-gray-600 mt-2">Real-time wildlife audio monitoring and automatic alert system</p>
+  </div>
+
+  <!-- Detection Control Panel -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="flex items-center gap-2">
+        <mat-icon class="h-5 w-5">radio</mat-icon>
+        Audio Detection Control
+      </mat-card-title>
+      <mat-card-subtitle>Activate real-time wildlife sound detection and monitoring</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="space-y-4">
+      <div class="flex items-center gap-4">
+        <button mat-raised-button
+          [color]="detectionActive ? 'primary' : 'accent'"
+          (click)="startMonitoring()"
+          [disabled]="detectionActive">
+          {{ detectionActive ? 'Detection Active' : 'Start Detection' }}
+          <mat-icon class="ml-2">{{ detectionActive ? 'mic' : 'mic_none' }}</mat-icon>
+        </button>
+
+        <button mat-raised-button color="warn" (click)="stopMonitoring()" [disabled]="!detectionActive">
+          Stop Detection
+          <mat-icon class="ml-2">mic_off</mat-icon>
+        </button>
+
+        <div class="flex items-center gap-2">
+          <div class="w-3 h-3 rounded-full" [ngClass]="detectionActive ? 'bg-green-500 animate-pulse' : 'bg-gray-300'"></div>
+          <span class="text-sm text-gray-600">{{ detectionActive ? 'Listening...' : 'Inactive' }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="isMonitoring" class="space-y-2">
+        <p class="text-sm text-gray-600">Processing audio input...</p>
+        <mat-progress-bar mode="determinate" [value]="progressValue" class="w-full"></mat-progress-bar>
+        <p class="text-xs text-gray-500">Analyzing frequency patterns and sound signatures</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Current Detection Results -->
+  <mat-card *ngIf="currentDetection" [ngClass]="getThreatColorClass(currentDetection.threat)">
+    <mat-card-header>
+      <mat-card-title class="flex items-center gap-2">
+        <mat-icon class="h-5 w-5" [ngClass]="getThreatTextColorClass(currentDetection.threat)">warning</mat-icon>
+        Wildlife Detected!
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="space-y-4">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <label class="text-sm font-medium text-gray-600">Animal</label>
+          <p class="text-lg font-semibold">{{ currentDetection.animal }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600">Behavior</label>
+          <p class="text-lg font-semibold">{{ currentDetection.behavior }}</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600">Confidence</label>
+          <p class="text-lg font-semibold">{{ currentDetection.confidence }}%</p>
+        </div>
+        <div>
+          <label class="text-sm font-medium text-gray-600">Location</label>
+          <p class="text-lg font-semibold">{{ currentDetection.location }}</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <mat-chip-listbox>
+          <mat-chip [color]="getBadgeColor(currentDetection.threat)" selected>
+            {{ currentDetection.threat }} Threat Level
+          </mat-chip>
+        </mat-chip-listbox>
+
+        <button *ngIf="currentDetection.threat === 'High' && !alertSent"
+          mat-raised-button color="warn" (click)="simulateAlert()">
+          Send Emergency Alert
+          <mat-icon class="ml-2">message</mat-icon>
+        </button>
+
+        <div *ngIf="alertSent" class="flex items-center gap-2 text-green-600">
+          <mat-icon class="h-4 w-4">check_circle</mat-icon>
+          <span class="text-sm font-medium">Alert Sent Successfully</span>
+        </div>
+      </div>
+
+      <mat-card *ngIf="currentDetection.threat === 'High'" class="border-red-200 bg-red-50">
+        <mat-card-content class="flex items-center gap-2 text-red-800">
+          <mat-icon class="h-4 w-4">warning</mat-icon>
+          <p><strong>High-Risk Situation Detected!</strong> Aggressive wildlife behavior identified. Immediate action required to prevent human-wildlife conflict.</p>
+        </mat-card-content>
+      </mat-card>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Alert Status -->
+  <mat-card *ngIf="alertSent" class="bg-green-50 border-green-200">
+    <mat-card-header>
+      <mat-card-title class="text-green-800 flex items-center gap-2">
+        <mat-icon class="h-5 w-5">check_circle</mat-icon>
+        Emergency Alert Dispatched
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span>SMS alerts sent to 42 registered travelers</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span>Email notifications to Forest Rangers</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+          <span>Patrol units alerted and dispatched</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Detection History -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Recent Detection History</mat-card-title>
+      <mat-card-subtitle>Latest wildlife detections from the monitoring system</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="space-y-3">
+        <div *ngFor="let detection of [
+          { time: '14:32', animal: 'Tiger', behavior: 'Aggressive', location: 'Sector 7', threat: 'High', alerted: true },
+          { time: '14:15', animal: 'Elephant Herd', behavior: 'Crossing', location: 'Highway KM 15', threat: 'Medium', alerted: true },
+          { time: '13:58', animal: 'Leopard', behavior: 'Hunting', location: 'Buffer Zone 2', threat: 'High', alerted: true },
+          { time: '13:42', animal: 'Peacock', behavior: 'Mating Call', location: 'Trail 1', threat: 'Low', alerted: false },
+          { time: '13:28', animal: 'Wild Boar', behavior: 'Feeding', location: 'Water Hole 3', threat: 'Low', alerted: false }
+        ]" class="flex items-center justify-between p-3 border rounded-lg">
+          <div class="flex items-center gap-4">
+            <div class="text-sm font-mono text-gray-500">{{ detection.time }}</div>
+            <div>
+              <p class="font-medium">{{ detection.animal }}</p>
+              <p class="text-sm text-gray-600">{{ detection.location }}</p>
+            </div>
+            <mat-chip-listbox>
+              <mat-chip>{{ detection.behavior }}</mat-chip>
+            </mat-chip-listbox>
+          </div>
+          <div class="flex items-center gap-2">
+            <mat-chip-listbox>
+              <mat-chip [color]="getBadgeColor(detection.threat)" selected>
+                {{ detection.threat }}
+              </mat-chip>
+            </mat-chip-listbox>
+            <mat-icon *ngIf="detection.alerted" class="h-4 w-4 text-green-600">check_circle</mat-icon>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

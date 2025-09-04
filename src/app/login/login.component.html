@@ -1,0 +1,36 @@
+<div class="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4">
+  <mat-card class="shadow-2xl border-0 w-full max-w-md">
+    <mat-card-header class="text-center space-y-4 flex flex-col items-center">
+      <div class="mx-auto w-20 h-20 bg-green-600 rounded-full flex items-center justify-center">
+        <mat-icon class="text-white" style="font-size: 40px; width: 40px; height: 40px;">shield</mat-icon>
+      </div>
+      <mat-card-title class="text-2xl font-bold text-gray-900">Wildlife Monitoring System</mat-card-title>
+      <mat-card-subtitle class="text-gray-600 mt-2">Bandipur Reserve - Mysore Route</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content class="space-y-6">
+      <div class="text-center">
+        <p class="text-sm text-gray-600 mb-4">
+          Authorized access for Forest Range Officers and Registered Travelers
+        </p>
+      </div>
+
+      <button mat-raised-button color="primary" class="w-full bg-green-600 hover:bg-green-700 text-white py-3"
+        (click)="handleGoogleLogin()" [disabled]="isLoading">
+        <mat-icon class="mr-2">chrome_reader_mode</mat-icon>
+        {{ isLoading ? 'Authenticating...' : 'Sign in with Google' }}
+      </button>
+
+      <div class="text-center">
+        <p class="text-xs text-gray-500">
+          By signing in, you agree to the Forest Department's terms of service
+        </p>
+      </div>
+
+      <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
+        <p class="text-xs text-amber-800">
+          <strong>Emergency Contact:</strong> Forest Range Office - +91-8212-252026
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

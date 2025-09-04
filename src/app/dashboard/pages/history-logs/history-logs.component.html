@@ -1,0 +1,147 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">Detection History & Logs</h1>
+    <p class="text-gray-600 mt-2">
+      Complete record of wildlife detections and conflict prevention activities
+    </p>
+  </div>
+
+  <!-- Summary Stats -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <mat-card>
+      <mat-card-content class="p-4">
+        <div class="text-2xl font-bold text-blue-600">156</div>
+        <p class="text-sm text-gray-600">Total Detections</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-content class="p-4">
+        <div class="text-2xl font-bold text-red-600">23</div>
+        <p class="text-sm text-gray-600">High-Risk Alerts</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-content class="p-4">
+        <div class="text-2xl font-bold text-green-600">98%</div>
+        <p class="text-sm text-gray-600">Response Rate</p>
+      </mat-card-content>
+    </mat-card>
+    <mat-card>
+      <mat-card-content class="p-4">
+        <div class="text-2xl font-bold text-purple-600">4.2 min</div>
+        <p class="text-sm text-gray-600">Avg Response Time</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Filters and Search -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Filter & Search</mat-card-title>
+      <mat-card-subtitle>
+        Filter detection records by animal type, threat level, or search specific incidents
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="flex flex-col md:flex-row gap-4">
+        <mat-form-field appearance="outline" class="flex-1">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Search by animal, location, or behavior..." [(ngModel)]="searchTerm" (ngModelChange)="applyFilters()">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full md:w-48">
+          <mat-select [(ngModel)]="filterAnimal" (ngModelChange)="applyFilters()">
+            <mat-option value="all">All Animals</mat-option>
+            <mat-option value="tiger">Tiger</mat-option>
+            <mat-option value="elephant">Elephant</mat-option>
+            <mat-option value="leopard">Leopard</mat-option>
+            <mat-option value="bear">Bear</mat-option>
+            <mat-option value="boar">Wild Boar</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w-full md:w-48">
+          <mat-select [(ngModel)]="filterThreat" (ngModelChange)="applyFilters()">
+            <mat-option value="all">All Threat Levels</mat-option>
+            <mat-option value="high">High (80+)</mat-option>
+            <mat-option value="medium">Medium (60-79)</mat-option>
+            <mat-option value="low">Low (&lt;60)</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="exportData()">
+          Export CSV
+          <mat-icon class="ml-2">download</mat-icon>
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- History Table -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Detection Records</mat-card-title>
+      <mat-card-subtitle>
+        Showing {{ filteredData.length }} of {{ historyData.length }} records
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="overflow-x-auto">
+        <table mat-table [dataSource]="filteredData" class="w-full">
+          <!-- Column Definitions -->
+          <ng-container matColumnDef="timestamp">
+            <th mat-header-cell *matHeaderCellDef> Timestamp </th>
+            <td mat-cell *matCellDef="let record" class="font-mono text-sm"> {{ record.timestamp }} </td>
+          </ng-container>
+          <ng-container matColumnDef="animal">
+            <th mat-header-cell *matHeaderCellDef> Animal </th>
+            <td mat-cell *matCellDef="let record" class="font-medium"> {{ record.animal }} </td>
+          </ng-container>
+          <ng-container matColumnDef="behavior">
+            <th mat-header-cell *matHeaderCellDef> Behavior </th>
+            <td mat-cell *matCellDef="let record">
+              <mat-chip-listbox>
+                <mat-chip>{{ record.behavior }}</mat-chip>
+              </mat-chip-listbox>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="location">
+            <th mat-header-cell *matHeaderCellDef> Location </th>
+            <td mat-cell *matCellDef="let record" class="max-w-xs truncate"> {{ record.location }} </td>
+          </ng-container>
+          <ng-container matColumnDef="conflictScore">
+            <th mat-header-cell *matHeaderCellDef> Conflict Score </th>
+            <td mat-cell *matCellDef="let record">
+              <mat-chip-listbox>
+                <mat-chip [color]="getConflictScoreColor(record.conflictScore)" selected>
+                  {{ record.conflictScore }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="alertStatus">
+            <th mat-header-cell *matHeaderCellDef> Alert Status </th>
+            <td mat-cell *matCellDef="let record">
+              <mat-chip-listbox>
+                <mat-chip [color]="getAlertStatusColor(record.alertStatus)" selected>
+                  {{ record.alertStatus }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="responseTime">
+            <th mat-header-cell *matHeaderCellDef> Response Time </th>
+            <td mat-cell *matCellDef="let record"> {{ record.responseTime }} </td>
+          </ng-container>
+          <ng-container matColumnDef="outcome">
+            <th mat-header-cell *matHeaderCellDef> Outcome </th>
+            <td mat-cell *matCellDef="let record" class="max-w-xs truncate"> {{ record.outcome }} </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

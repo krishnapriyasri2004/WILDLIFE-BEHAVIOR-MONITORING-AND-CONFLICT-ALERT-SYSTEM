@@ -1,0 +1,107 @@
+/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+/* Custom styles for Angular Material components to match Tailwind/shadcn aesthetic */
+.mat-mdc-card {
+  @apply rounded-lg shadow-md;
+}
+
+.mat-mdc-card-header {
+  @apply p-6;
+}
+
+.mat-mdc-card-content {
+  @apply p-6;
+}
+
+.mat-mdc-button.mat-mdc-button-base {
+  @apply rounded-md;
+}
+
+.mat-mdc-raised-button.mat-primary {
+  @apply bg-green-600 text-white;
+}
+
+.mat-mdc-raised-button.mat-accent {
+  @apply bg-purple-600 text-white;
+}
+
+.mat-mdc-raised-button.mat-warn {
+  @apply bg-red-600 text-white;
+}
+
+.mat-mdc-stroked-button.mat-warn {
+  @apply border-red-200 text-red-600;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-flex {
+  @apply rounded-md;
+}
+
+.mat-mdc-form-field-appearance-outline .mat-mdc-form-field-outline {
+  @apply border border-gray-300 rounded-md;
+}
+
+.mat-mdc-select-value-text {
+  @apply text-gray-700;
+}
+
+.mat-mdc-option {
+  @apply text-gray-700;
+}
+
+.mat-mdc-list-item {
+  @apply rounded-md;
+}
+
+.mat-mdc-list-item.active {
+  @apply bg-green-600 text-white;
+}
+
+.mat-mdc-chip-set .mat-mdc-chip {
+  @apply rounded-full px-3 py-1 text-xs font-medium;
+}
+
+.mat-mdc-chip.mat-primary {
+  @apply bg-green-100 text-green-800;
+}
+
+.mat-mdc-chip.mat-accent {
+  @apply bg-yellow-100 text-yellow-800;
+}
+
+.mat-mdc-chip.mat-warn {
+  @apply bg-red-100 text-red-800;
+}
+
+.mat-mdc-chip.mat-basic {
+  @apply bg-gray-100 text-gray-800;
+}
+
+/* Table styles */
+.mat-mdc-table {
+  @apply w-full;
+}
+
+.mat-mdc-header-cell {
+  @apply font-semibold text-gray-700 bg-gray-50;
+}
+
+.mat-mdc-cell {
+  @apply text-gray-800;
+}
+
+.mat-mdc-row:hover {
+  @apply bg-gray-50;
+}

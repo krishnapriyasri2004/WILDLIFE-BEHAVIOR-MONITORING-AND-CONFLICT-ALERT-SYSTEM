@@ -1,0 +1,160 @@
+<div class="space-y-6">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900">Animal Audio Detection & Emotion Prediction</h1>
+    <p class="text-gray-600 mt-2">AI-powered wildlife behavior analysis using CNN models</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Audio Selection and Playback -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>Audio Analysis</mat-card-title>
+        <mat-card-subtitle>
+          Select an animal sound or upload your own to analyze behavior and emotional state
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content class="space-y-6">
+        <!-- Predefined Audio Section -->
+        <div class="space-y-4 border-b pb-4">
+          <h3 class="text-lg font-semibold">Predefined Animal Sounds</h3>
+          <div>
+            <label class="text-sm font-medium mb-2 block">Select Animal</label>
+            <mat-form-field appearance="outline" class="w-full">
+              <mat-select [(ngModel)]="selectedAnimal" (selectionChange)="userAudioFile = null; userAudioName = null; prediction = null;">
+                <mat-option value="">Choose an animal...</mat-option>
+                <mat-option *ngFor="let animal of animals" [value]="animal.id">
+                  {{ animal.name }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <button mat-raised-button color="primary"
+              (click)="handlePlayAudio(false)"
+              [disabled]="!selectedAnimal || isPlaying || isAnalyzing">
+              <mat-icon *ngIf="isAnalyzing && analysisSource === 'predefined'">hourglass_empty</mat-icon>
+              <mat-icon *ngIf="isPlaying && analysisSource === 'predefined'">pause</mat-icon>
+              <mat-icon *ngIf="!isPlaying || analysisSource !== 'predefined'">play_arrow</mat-icon>
+              {{ isAnalyzing && analysisSource === 'predefined' ? 'Analyzing...' : (isPlaying && analysisSource === 'predefined' ? 'Playing' : 'Play & Analyze') }}
+            </button>
+            <mat-icon class="h-5 w-5 text-gray-400">volume_up</mat-icon>
+          </div>
+        </div>
+
+        <!-- User Audio Upload Section -->
+        <div class="space-y-4 pt-4">
+          <h3 class="text-lg font-semibold">Upload Your Own Audio</h3>
+          <div>
+            <label for="audio-upload" class="text-sm font-medium mb-2 block">
+              Upload Audio File (e.g., .mp3, .wav)
+            </label>
+            <input id="audio-upload" type="file" accept="audio/*" (change)="handleUserAudioUpload($event)"
+              class="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100" />
+            <p *ngIf="userAudioName" class="text-sm text-gray-600 mt-2">Selected: {{ userAudioName }}</p>
+          </div>
+          <button mat-raised-button color="accent"
+            (click)="handlePlayAudio(true)"
+            [disabled]="!userAudioFile || isPlaying || isAnalyzing">
+            <mat-icon *ngIf="isAnalyzing && analysisSource === 'user'">hourglass_empty</mat-icon>
+            <mat-icon *ngIf="isPlaying && analysisSource === 'user'">pause</mat-icon>
+            <mat-icon *ngIf="!isPlaying || analysisSource !== 'user'">cloud_upload</mat-icon>
+            {{ isAnalyzing && analysisSource === 'user' ? 'Analyzing...' : (isPlaying && analysisSource === 'user' ? 'Playing' : 'Analyze Uploaded Audio') }}
+          </button>
+        </div>
+
+        <mat-progress-bar *ngIf="isAnalyzing" mode="determinate" [value]="progressValue"></mat-progress-bar>
+        <p *ngIf="isAnalyzing" class="text-sm text-gray-600 mt-2">Processing audio with CNN model...</p>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Prediction Results -->
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>AI Prediction Results</mat-card-title>
+        <mat-card-subtitle>Real-time emotion and behavior analysis</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <div *ngIf="prediction" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="text-sm font-medium text-gray-600">Detected Emotion</label>
+              <mat-chip-listbox class="mt-1">
+                <mat-chip [color]="getBadgeColor(prediction.threatLevel)" selected>
+                  {{ prediction.emotion }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-600">Behavior</label>
+              <mat-chip-listbox class="mt-1">
+                <mat-chip>{{ prediction.behavior }}</mat-chip>
+              </mat-chip-listbox>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium text-gray-600">Confidence Score</label>
+            <div class="flex items-center gap-2 mt-1">
+              <mat-progress-bar mode="determinate" [value]="prediction.confidence" class="flex-1"></mat-progress-bar>
+              <span class="text-sm font-medium">{{ prediction.confidence }}%</span>
+            </div>
+          </div>
+
+          <div [ngClass]="getThreatColor(prediction.threatLevel)" class="p-3 rounded-lg border">
+            <div class="flex items-center gap-2">
+              <mat-icon class="h-4 w-4">warning</mat-icon>
+              <span class="font-medium">Threat Level: {{ prediction.threatLevel }}</span>
+            </div>
+            <p *ngIf="prediction.threatLevel === 'High'" class="text-sm mt-1">
+              ⚠️ High-risk behavior detected. Alert forest rangers and nearby travelers.
+            </p>
+          </div>
+          <p *ngIf="analysisSource" class="text-xs text-gray-500 mt-4">
+            Analysis performed on {{ analysisSource === 'user' ? 'user-uploaded audio' : 'predefined animal sound' }}.
+          </p>
+        </div>
+        <div *ngIf="!prediction" class="text-center py-8 text-gray-500">
+          <mat-icon class="h-12 w-12 mx-auto mb-4 opacity-50">volume_up</mat-icon>
+          <p>Select an animal or upload audio to see AI predictions</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Recent Detections -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Recent Audio Detections</mat-card-title>
+      <mat-card-subtitle>Latest wildlife audio analysis results from field sensors</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="space-y-3">
+        <div *ngFor="let detection of [
+          { animal: 'Tiger', emotion: 'Aggressive', location: 'Sector 7', time: '5 min ago', threat: 'High' },
+          { animal: 'Elephant', emotion: 'Alert', location: 'Highway KM 12', time: '12 min ago', threat: 'Medium' },
+          { animal: 'Leopard', emotion: 'Calm', location: 'Gopalaswamy Hills', time: '25 min ago', threat: 'Low' },
+          { animal: 'Wild Boar', emotion: 'Territorial', location: 'Buffer Zone 3', time: '1 hour ago', threat: 'Medium' }
+        ]" class="flex items-center justify-between p-3 border rounded-lg">
+          <div class="flex items-center gap-4">
+            <div>
+              <p class="font-medium">{{ detection.animal }}</p>
+              <p class="text-sm text-gray-600">{{ detection.location }}</p>
+            </div>
+            <mat-chip-listbox>
+              <mat-chip>{{ detection.emotion }}</mat-chip>
+            </mat-chip-listbox>
+          </div>
+          <div class="text-right">
+            <mat-chip-listbox>
+              <mat-chip [color]="getBadgeColor(detection.threat)" selected>
+                {{ detection.threat }}
+              </mat-chip>
+            </mat-chip-listbox>
+            <p class="text-sm text-gray-500 mt-1">{{ detection.time }}</p>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
